@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"table": {
+			"file": {
 				"type": "string"
 			},
 			"sheet": {
@@ -23,7 +23,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@concat(dataset().table,'.xlsx')",
+					"value": "@concat(dataset().file,'.xlsx')",
 					"type": "Expression"
 				},
 				"container": "pocglobant"
