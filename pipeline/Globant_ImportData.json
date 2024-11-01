@@ -54,8 +54,8 @@
 									"referenceName": "DS_ExcelPoc",
 									"type": "DatasetReference",
 									"parameters": {
-										"table": {
-											"value": "@item().table",
+										"file": {
+											"value": "@item().file",
 											"type": "Expression"
 										},
 										"sheet": {
@@ -71,7 +71,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"table": {
-											"value": "@item().file",
+											"value": "@item().table",
 											"type": "Expression"
 										}
 									}
@@ -86,18 +86,7 @@
 			"File": {
 				"type": "Array",
 				"defaultValue": [
-					{
-						"file": "departments",
-						"sheet": "departments"
-					},
-					{
-						"file": "hired_employees",
-						"sheet": "hired_employees"
-					},
-					{
-						"file": "jobs",
-						"sheet": "jobs"
-					}
+					"[{\"file\":\"departments\",\"sheet\":\"departments\",\"table\":\"departments\",{\"file\":\"hired_employees\",\"sheet\":\"hired_employees\",\"table\":\"HiredEmployees\"},{\"file\":\"jobs\",\"sheet\":\"jobs\",\"table\":\"Jobs\"}]"
 				]
 			}
 		},
