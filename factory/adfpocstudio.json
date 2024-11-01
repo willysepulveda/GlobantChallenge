@@ -1,0 +1,9 @@
+{
+	"name": "adfpocstudio",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "073573ee-51f5-4f98-9fa2-cec35ecd8538",
+		"tenantId": "6a514a79-ad71-4767-aa13-9ae9ceb4c1d5"
+	}
+}
