@@ -86,7 +86,21 @@
 			"File": {
 				"type": "Array",
 				"defaultValue": [
-					"[{\"file\":\"departments\",\"sheet\":\"departments\",\"table\":\"departments\",{\"file\":\"hired_employees\",\"sheet\":\"hired_employees\",\"table\":\"HiredEmployees\"},{\"file\":\"jobs\",\"sheet\":\"jobs\",\"table\":\"Jobs\"}]"
+					{
+						"file": "departments",
+						"sheet": "departments",
+						"table": "departments"
+					},
+					{
+						"file": "hired_employees",
+						"sheet": "hired_employees",
+						"table": "HiredEmployees"
+					},
+					{
+						"file": "jobs",
+						"sheet": "jobs",
+						"table": "Jobs"
+					}
 				]
 			}
 		},
