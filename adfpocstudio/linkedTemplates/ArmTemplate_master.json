@@ -7,13 +7,13 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfpocstudio"
 		},
-		"LS_sablpoc_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_sablpoc'"
-		},
 		"LS_DBPoc_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_DBPoc'"
+		},
+		"LS_sablpoc_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_sablpoc'"
 		},
 		"LS_DBPoc_properties_typeProperties_server": {
 			"type": "string",
@@ -54,11 +54,11 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"LS_sablpoc_connectionString": {
-						"value": "[parameters('LS_sablpoc_connectionString')]"
-					},
 					"LS_DBPoc_password": {
 						"value": "[parameters('LS_DBPoc_password')]"
+					},
+					"LS_sablpoc_connectionString": {
+						"value": "[parameters('LS_sablpoc_connectionString')]"
 					},
 					"LS_DBPoc_properties_typeProperties_server": {
 						"value": "[parameters('LS_DBPoc_properties_typeProperties_server')]"

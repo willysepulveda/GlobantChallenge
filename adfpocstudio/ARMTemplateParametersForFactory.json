@@ -5,10 +5,10 @@
 		"factoryName": {
 			"value": "adfpocstudio"
 		},
-		"LS_sablpoc_connectionString": {
+		"LS_DBPoc_password": {
 			"value": ""
 		},
-		"LS_DBPoc_password": {
+		"LS_sablpoc_connectionString": {
 			"value": ""
 		},
 		"LS_DBPoc_properties_typeProperties_server": {

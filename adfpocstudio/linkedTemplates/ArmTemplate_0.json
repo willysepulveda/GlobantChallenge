@@ -7,13 +7,13 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfpocstudio"
 		},
-		"LS_sablpoc_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_sablpoc'"
-		},
 		"LS_DBPoc_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_DBPoc'"
+		},
+		"LS_sablpoc_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_sablpoc'"
 		},
 		"LS_DBPoc_properties_typeProperties_server": {
 			"type": "string",
@@ -32,19 +32,6 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_sablpoc')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_sablpoc_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_DBPoc')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -66,6 +53,54 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_sablpoc')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_sablpoc_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_DBPoc')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_DBPoc",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"table": {
+						"type": "string"
+					},
+					"schema": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DBPoc')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ExcelPoc')]",
@@ -107,31 +142,95 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_DBPoc')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/DF_HiredEmployees_Tranformation')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_DBPoc",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"table": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
+				"type": "MappingDataFlow",
 				"typeProperties": {
-					"schema": "GlobantPoc",
-					"table": {
-						"value": "@dataset().table",
-						"type": "Expression"
-					}
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_DBPoc",
+								"type": "DatasetReference"
+							},
+							"name": "SRCStageHiredEmployees"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "LS_DBPoc",
+								"type": "LinkedServiceReference"
+							},
+							"name": "snkHiredEmployees"
+						}
+					],
+					"transformations": [
+						{
+							"name": "drvSplitName"
+						},
+						{
+							"name": "drvNullImputation"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          EmployeeID as integer,",
+						"          Name as string,",
+						"          HireDate as timestamp,",
+						"          JobID as integer,",
+						"          DepartmentID as integer,",
+						"          CreatedDate as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'SELECT * FROM GPStage.StageHiredEmployees',",
+						"     format: 'query') ~> SRCStageHiredEmployees",
+						"SRCStageHiredEmployees derive(FirstName = split(Name, ' ')[1],",
+						"          LastName = split(Name, ' ')[2]) ~> drvSplitName",
+						"drvSplitName derive(HireDate_fix = toTimestamp(iifNull(toString(HireDate),'1900-01-01'),'yyyy-MM-dd'),",
+						"          JobID_fix = iifNull(JobID,0),",
+						"          DepartmentID_fix = iifNull(DepartmentID,0),",
+						"          FirstName_fix = iifNull(FirstName,'No First Name Register'),",
+						"          LastName_fix = iifNull(LastName,'No LastName Name Register')) ~> drvNullImputation",
+						"drvNullImputation sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          EmployeeID as integer,",
+						"          FirstName as string,",
+						"          LastName as string,",
+						"          HireDate as timestamp,",
+						"          JobID as integer,",
+						"          DepartmentID as integer,",
+						"          CreatedDate as timestamp",
+						"     ),",
+						"     format: 'table',",
+						"     store: 'sqlserver',",
+						"     schemaName: 'GlobantPoc',",
+						"     tableName: 'HiredEmployees',",
+						"     preSQLs:['TRUNCATE TABLE GlobantPoc.HiredEmployees'],",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     deletable: false,",
+						"     upsertable: false,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          HireDate = HireDate_fix,",
+						"          FirstName = FirstName_fix,",
+						"          LastName = LastName_fix,",
+						"          JobID = JobID_fix,",
+						"          DepartmentID = DepartmentID_fix,",
+						"          CreatedDate",
+						"     )) ~> snkHiredEmployees"
+					]
 				}
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_DBPoc')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_DBPoc')]"
 			]
 		},
@@ -164,7 +263,7 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
-								"preCopyScript": "ALTER TABLE GlobantPoc.HiredEmployees\nDROP CONSTRAINT FK__HiredEmpl__depar__60A75C0F;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.Departments;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees\nADD CONSTRAINT FK__HiredEmpl__depar__60A75C0F\nFOREIGN KEY (department_id) REFERENCES GlobantPoc.Departments(id);\n",
+								"preCopyScript": "TRUNCATE TABLE GlobantPoc.Departments;",
 								"writeBehavior": "insert",
 								"sqlWriterUseTableLock": false,
 								"disableMetricsCollection": false
@@ -176,21 +275,10 @@
 									{
 										"source": {
 											"type": "String",
-											"ordinal": 1
-										},
-										"sink": {
-											"name": "id",
-											"type": "Int32",
-											"physicalType": "int"
-										}
-									},
-									{
-										"source": {
-											"type": "String",
 											"ordinal": 2
 										},
 										"sink": {
-											"name": "department",
+											"name": "DepartmentName",
 											"type": "String",
 											"physicalType": "nvarchar"
 										}
@@ -218,13 +306,14 @@
 								"referenceName": "DS_DBPoc",
 								"type": "DatasetReference",
 								"parameters": {
-									"table": "Departments"
+									"table": "Departments",
+									"schema": "GlobantPoc"
 								}
 							}
 						]
 					},
 					{
-						"name": "CP_HiredEmployee",
+						"name": "CP_StageHiredEmployee",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -246,7 +335,7 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
-								"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.HiredEmployees ;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees CHECK CONSTRAINT ALL;\n\n\n",
+								"preCopyScript": "TRUNCATE TABLE GPStage.StageHiredEmployees ;",
 								"writeBehavior": "insert",
 								"sqlWriterUseTableLock": false,
 								"disableMetricsCollection": false
@@ -258,21 +347,10 @@
 									{
 										"source": {
 											"type": "String",
-											"ordinal": 1
-										},
-										"sink": {
-											"name": "id",
-											"type": "Int32",
-											"physicalType": "int"
-										}
-									},
-									{
-										"source": {
-											"type": "String",
 											"ordinal": 2
 										},
 										"sink": {
-											"name": "name",
+											"name": "Name",
 											"type": "String",
 											"physicalType": "nvarchar"
 										}
@@ -283,7 +361,7 @@
 											"ordinal": 3
 										},
 										"sink": {
-											"name": "datetime",
+											"name": "HireDate",
 											"type": "DateTime",
 											"physicalType": "datetime"
 										}
@@ -294,7 +372,7 @@
 											"ordinal": 4
 										},
 										"sink": {
-											"name": "department_id",
+											"name": "JobID",
 											"type": "Int32",
 											"physicalType": "int"
 										}
@@ -305,7 +383,7 @@
 											"ordinal": 5
 										},
 										"sink": {
-											"name": "job_id",
+											"name": "DepartmentID",
 											"type": "Int32",
 											"physicalType": "int"
 										}
@@ -333,7 +411,8 @@
 								"referenceName": "DS_DBPoc",
 								"type": "DatasetReference",
 								"parameters": {
-									"table": "HiredEmployees"
+									"table": "StageHiredEmployees",
+									"schema": "GPStage"
 								}
 							}
 						]
@@ -361,7 +440,7 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
-								"preCopyScript": "-- Variables para la tabla y el esquema\nDECLARE @tableName NVARCHAR(128) = 'Jobs';\nDECLARE @schemaName NVARCHAR(128) = 'GlobantPoc';\nDECLARE @foreignKeyName NVARCHAR(128);\nDECLARE @sql NVARCHAR(MAX);\n\n-- Obtener el nombre de la restricción de clave foránea\nSELECT TOP 1 @foreignKeyName = name\nFROM sys.foreign_keys\nWHERE referenced_object_id = OBJECT_ID(@schemaName + '.' + @tableName);\n\n-- Construir y ejecutar el SQL dinámico para deshabilitar la restricción\nSET @sql = 'ALTER TABLE ' + @schemaName + '.HiredEmployees DROP CONSTRAINT ' + @foreignKeyName + ';';\nEXEC sp_executesql @sql;\n\n-- Construir y ejecutar el SQL dinámico para truncar la tabla\nSET @sql = 'TRUNCATE TABLE ' + @schemaName + '.' + @tableName + ';';\nEXEC sp_executesql @sql;\n\n-- Construir y ejecutar el SQL dinámico para volver a agregar la restricción de clave foránea\nSET @sql = 'ALTER TABLE ' + @schemaName + '.HiredEmployees ADD CONSTRAINT ' + @foreignKeyName +\n           ' FOREIGN KEY (job_id) REFERENCES ' + @schemaName + '.' + @tableName + '(id);';\nEXEC sp_executesql @sql;\n\n",
+								"preCopyScript": "TRUNCATE TABLE GlobantPoc.Jobs",
 								"writeBehavior": "insert",
 								"sqlWriterUseTableLock": false,
 								"disableMetricsCollection": false
@@ -373,21 +452,10 @@
 									{
 										"source": {
 											"type": "String",
-											"ordinal": 1
-										},
-										"sink": {
-											"name": "id",
-											"type": "Int32",
-											"physicalType": "int"
-										}
-									},
-									{
-										"source": {
-											"type": "String",
 											"ordinal": 2
 										},
 										"sink": {
-											"name": "job",
+											"name": "JobTitle",
 											"type": "String",
 											"physicalType": "nvarchar"
 										}
@@ -415,10 +483,51 @@
 								"referenceName": "DS_DBPoc",
 								"type": "DatasetReference",
 								"parameters": {
-									"table": "Jobs"
+									"table": "Jobs",
+									"schema": "GlobantPoc"
 								}
 							}
 						]
+					},
+					{
+						"name": "exec DF_HiredEmployees_Tranformation",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "CP_StageHiredEmployee",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DF_HiredEmployees_Tranformation",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SRCStageHiredEmployees": {
+										"table": "StageHiredEmployees",
+										"schema": "GPStage"
+									},
+									"snkHiredEmployees": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -428,7 +537,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ExcelPoc')]",
-				"[concat(variables('factoryId'), '/datasets/DS_DBPoc')]"
+				"[concat(variables('factoryId'), '/datasets/DS_DBPoc')]",
+				"[concat(variables('factoryId'), '/dataflows/DF_HiredEmployees_Tranformation')]"
 			]
 		}
 	]
