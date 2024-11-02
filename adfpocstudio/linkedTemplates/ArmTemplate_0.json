@@ -164,7 +164,7 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
-								"preCopyScript": "ALTER TABLE GlobantPoc.HiredEmployees\nDROP CONSTRAINT FK__HiredEmpl__depar__60A75C0F;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.Departments;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees\nADD CONSTRAINT FK__HiredEmpl__depar__60A75C0F\nFOREIGN KEY (department_id) REFERENCES GlobantPoc.Departments(id);",
+								"preCopyScript": "ALTER TABLE GlobantPoc.HiredEmployees\nDROP CONSTRAINT FK__HiredEmpl__depar__60A75C0F;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.Departments;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees\nADD CONSTRAINT FK__HiredEmpl__depar__60A75C0F\nFOREIGN KEY (department_id) REFERENCES GlobantPoc.Departments(id);\n",
 								"writeBehavior": "insert",
 								"sqlWriterUseTableLock": false,
 								"disableMetricsCollection": false
@@ -246,7 +246,7 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
-								"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.HiredEmployees ;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees CHECK CONSTRAINT ALL;\n",
+								"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.HiredEmployees ;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees CHECK CONSTRAINT ALL;\n\n\n",
 								"writeBehavior": "insert",
 								"sqlWriterUseTableLock": false,
 								"disableMetricsCollection": false
@@ -361,7 +361,7 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
-								"preCopyScript": "-- Variables para la tabla y el esquema\nDECLARE @tableName NVARCHAR(128) = 'Jobs';\nDECLARE @schemaName NVARCHAR(128) = 'GlobantPoc';\nDECLARE @foreignKeyName NVARCHAR(128);\nDECLARE @sql NVARCHAR(MAX);\n\n-- Obtener el nombre de la restricción de clave foránea\nSELECT TOP 1 @foreignKeyName = name\nFROM sys.foreign_keys\nWHERE referenced_object_id = OBJECT_ID(@schemaName + '.' + @tableName);\n\n-- Construir y ejecutar el SQL dinámico para deshabilitar la restricción\nSET @sql = 'ALTER TABLE ' + @schemaName + '.HiredEmployees DROP CONSTRAINT ' + @foreignKeyName + ';';\nEXEC sp_executesql @sql;\n\n-- Construir y ejecutar el SQL dinámico para truncar la tabla\nSET @sql = 'TRUNCATE TABLE ' + @schemaName + '.' + @tableName + ';';\nEXEC sp_executesql @sql;\n\n-- Construir y ejecutar el SQL dinámico para volver a agregar la restricción de clave foránea\nSET @sql = 'ALTER TABLE ' + @schemaName + '.HiredEmployees ADD CONSTRAINT ' + @foreignKeyName +\n           ' FOREIGN KEY (job_id) REFERENCES ' + @schemaName + '.' + @tableName + '(id);';\nEXEC sp_executesql @sql;",
+								"preCopyScript": "-- Variables para la tabla y el esquema\nDECLARE @tableName NVARCHAR(128) = 'Jobs';\nDECLARE @schemaName NVARCHAR(128) = 'GlobantPoc';\nDECLARE @foreignKeyName NVARCHAR(128);\nDECLARE @sql NVARCHAR(MAX);\n\n-- Obtener el nombre de la restricción de clave foránea\nSELECT TOP 1 @foreignKeyName = name\nFROM sys.foreign_keys\nWHERE referenced_object_id = OBJECT_ID(@schemaName + '.' + @tableName);\n\n-- Construir y ejecutar el SQL dinámico para deshabilitar la restricción\nSET @sql = 'ALTER TABLE ' + @schemaName + '.HiredEmployees DROP CONSTRAINT ' + @foreignKeyName + ';';\nEXEC sp_executesql @sql;\n\n-- Construir y ejecutar el SQL dinámico para truncar la tabla\nSET @sql = 'TRUNCATE TABLE ' + @schemaName + '.' + @tableName + ';';\nEXEC sp_executesql @sql;\n\n-- Construir y ejecutar el SQL dinámico para volver a agregar la restricción de clave foránea\nSET @sql = 'ALTER TABLE ' + @schemaName + '.HiredEmployees ADD CONSTRAINT ' + @foreignKeyName +\n           ' FOREIGN KEY (job_id) REFERENCES ' + @schemaName + '.' + @tableName + '(id);';\nEXEC sp_executesql @sql;\n\n",
 								"writeBehavior": "insert",
 								"sqlWriterUseTableLock": false,
 								"disableMetricsCollection": false
