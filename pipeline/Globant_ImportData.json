@@ -25,7 +25,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE GlobantPoc.Departments",
+						"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.Departments NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.Departments;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.Departments CHECK CONSTRAINT ALL;",
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
@@ -79,7 +79,7 @@
 						"referenceName": "DS_DBPoc",
 						"type": "DatasetReference",
 						"parameters": {
-							"table": "departments"
+							"table": "Departments"
 						}
 					}
 				]
@@ -107,7 +107,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE GlobantPoc.HiredEmployees",
+						"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.HiredEmployees ;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees CHECK CONSTRAINT ALL;\n",
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
@@ -189,7 +189,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE GlobantPoc.Jobs",
+						"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.Jobs NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.Jobs;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.Jobs CHECK CONSTRAINT ALL;",
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
