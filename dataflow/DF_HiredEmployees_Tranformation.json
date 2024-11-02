@@ -24,6 +24,9 @@
 			"transformations": [
 				{
 					"name": "drvSplitName"
+				},
+				{
+					"name": "drvHireDateNull"
 				}
 			],
 			"scriptLines": [
@@ -42,7 +45,8 @@
 				"     format: 'query') ~> SRCStageHiredEmployees",
 				"SRCStageHiredEmployees derive(FirstName = split(Name, ' ')[1],",
 				"          LastName = split(Name, ' ')[2]) ~> drvSplitName",
-				"drvSplitName sink(allowSchemaDrift: true,",
+				"drvSplitName derive(HireDate_fix = toTimestamp(iifNull(toString(HireDate),'1900-01-01'))) ~> drvHireDateNull",
+				"drvHireDateNull sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          EmployeeID as integer,",
@@ -66,7 +70,7 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
-				"          HireDate,",
+				"          HireDate = HireDate_fix,",
 				"          FirstName,",
 				"          LastName,",
 				"          JobID,",

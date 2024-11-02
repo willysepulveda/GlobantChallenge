@@ -250,6 +250,43 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "exec DF_HiredEmployees_Tranformation",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "CP_StageHiredEmployee",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DF_HiredEmployees_Tranformation",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"SRCStageHiredEmployees": {
+								"table": "StageHiredEmployees",
+								"schema": "GPStage"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
 			}
 		],
 		"annotations": []
