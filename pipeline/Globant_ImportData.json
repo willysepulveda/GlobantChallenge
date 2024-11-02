@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "CP_departments",
+				"name": "CP_department",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -25,7 +25,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "ALTER TABLE GlobantPoc.HiredEmployees\nDROP CONSTRAINT FK__HiredEmpl__depar__60A75C0F;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.Departments;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees\nADD CONSTRAINT FK__HiredEmpl__depar__60A75C0F\nFOREIGN KEY (department_id) REFERENCES GlobantPoc.Departments(id);",
+						"preCopyScript": "TRUNCATE TABLE GlobantPoc.Departments;",
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
@@ -37,21 +37,10 @@
 							{
 								"source": {
 									"type": "String",
-									"ordinal": 1
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"type": "String",
 									"ordinal": 2
 								},
 								"sink": {
-									"name": "department",
+									"name": "DepartmentName",
 									"type": "String",
 									"physicalType": "nvarchar"
 								}
@@ -79,13 +68,14 @@
 						"referenceName": "DS_DBPoc",
 						"type": "DatasetReference",
 						"parameters": {
-							"table": "Departments"
+							"table": "Departments",
+							"schema": "GlobantPoc"
 						}
 					}
 				]
 			},
 			{
-				"name": "CP_HiredEmployees",
+				"name": "CP_StageHiredEmployee",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -107,7 +97,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.HiredEmployees ;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees CHECK CONSTRAINT ALL;\n",
+						"preCopyScript": "TRUNCATE TABLE GPStage.StageHiredEmployees ;",
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
@@ -119,21 +109,10 @@
 							{
 								"source": {
 									"type": "String",
-									"ordinal": 1
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"type": "String",
 									"ordinal": 2
 								},
 								"sink": {
-									"name": "name",
+									"name": "Name",
 									"type": "String",
 									"physicalType": "nvarchar"
 								}
@@ -144,7 +123,7 @@
 									"ordinal": 3
 								},
 								"sink": {
-									"name": "datetime",
+									"name": "HireDate",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								}
@@ -155,7 +134,7 @@
 									"ordinal": 4
 								},
 								"sink": {
-									"name": "department_id",
+									"name": "JobID",
 									"type": "Int32",
 									"physicalType": "int"
 								}
@@ -166,7 +145,7 @@
 									"ordinal": 5
 								},
 								"sink": {
-									"name": "job_id",
+									"name": "DepartmentID",
 									"type": "Int32",
 									"physicalType": "int"
 								}
@@ -194,13 +173,14 @@
 						"referenceName": "DS_DBPoc",
 						"type": "DatasetReference",
 						"parameters": {
-							"table": "HiredEmployees"
+							"table": "StageHiredEmployees",
+							"schema": "GPStage"
 						}
 					}
 				]
 			},
 			{
-				"name": "CP_Jobs",
+				"name": "CP_Job",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -222,7 +202,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.Jobs NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.Jobs;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.Jobs CHECK CONSTRAINT ALL;",
+						"preCopyScript": "TRUNCATE TABLE GlobantPoc.Jobs",
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
@@ -234,21 +214,10 @@
 							{
 								"source": {
 									"type": "String",
-									"ordinal": 1
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"type": "String",
 									"ordinal": 2
 								},
 								"sink": {
-									"name": "job",
+									"name": "JobTitle",
 									"type": "String",
 									"physicalType": "nvarchar"
 								}
@@ -276,10 +245,48 @@
 						"referenceName": "DS_DBPoc",
 						"type": "DatasetReference",
 						"parameters": {
-							"table": "Jobs"
+							"table": "Jobs",
+							"schema": "GlobantPoc"
 						}
 					}
 				]
+			},
+			{
+				"name": "exec DF_HiredEmployees_Tranformation",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "CP_StageHiredEmployee",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DF_HiredEmployees_Tranformation",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"SRCStageHiredEmployees": {
+								"table": "StageHiredEmployees",
+								"schema": "GPStage"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
 			}
 		],
 		"annotations": []

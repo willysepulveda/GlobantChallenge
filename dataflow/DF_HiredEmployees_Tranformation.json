@@ -1,0 +1,87 @@
+{
+	"name": "DF_HiredEmployees_Tranformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_DBPoc",
+						"type": "DatasetReference"
+					},
+					"name": "SRCStageHiredEmployees"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "LS_DBPoc",
+						"type": "LinkedServiceReference"
+					},
+					"name": "snkHiredEmployees"
+				}
+			],
+			"transformations": [
+				{
+					"name": "drvSplitName"
+				},
+				{
+					"name": "drvNullImputation"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmployeeID as integer,",
+				"          Name as string,",
+				"          HireDate as timestamp,",
+				"          JobID as integer,",
+				"          DepartmentID as integer,",
+				"          CreatedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT * FROM GPStage.StageHiredEmployees',",
+				"     format: 'query') ~> SRCStageHiredEmployees",
+				"SRCStageHiredEmployees derive(FirstName = split(Name, ' ')[1],",
+				"          LastName = split(Name, ' ')[2]) ~> drvSplitName",
+				"drvSplitName derive(HireDate_fix = toTimestamp(iifNull(toString(HireDate),'1900-01-01'),'yyyy-MM-dd'),",
+				"          JobID_fix = iifNull(JobID,0),",
+				"          DepartmentID_fix = iifNull(DepartmentID,0),",
+				"          FirstName_fix = iifNull(FirstName,'No First Name Register'),",
+				"          LastName_fix = iifNull(LastName,'No LastName Name Register')) ~> drvNullImputation",
+				"drvNullImputation sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          EmployeeID as integer,",
+				"          FirstName as string,",
+				"          LastName as string,",
+				"          HireDate as timestamp,",
+				"          JobID as integer,",
+				"          DepartmentID as integer,",
+				"          CreatedDate as timestamp",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'GlobantPoc',",
+				"     tableName: 'HiredEmployees',",
+				"     preSQLs:['TRUNCATE TABLE GlobantPoc.HiredEmployees'],",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          HireDate = HireDate_fix,",
+				"          FirstName = FirstName_fix,",
+				"          LastName = LastName_fix,",
+				"          JobID = JobID_fix,",
+				"          DepartmentID = DepartmentID_fix,",
+				"          CreatedDate",
+				"     )) ~> snkHiredEmployees"
+			]
+		}
+	}
+}
