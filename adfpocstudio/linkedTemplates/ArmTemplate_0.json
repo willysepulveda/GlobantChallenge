@@ -142,7 +142,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "CP_departments",
+						"name": "CP_department",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -224,7 +224,7 @@
 						]
 					},
 					{
-						"name": "CP_HiredEmployees",
+						"name": "CP_HiredEmployee",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -339,7 +339,7 @@
 						]
 					},
 					{
-						"name": "CP_Jobs",
+						"name": "CP_Job",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
