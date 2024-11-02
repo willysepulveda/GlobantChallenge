@@ -79,7 +79,8 @@
 						"referenceName": "DS_DBPoc",
 						"type": "DatasetReference",
 						"parameters": {
-							"table": "Departments"
+							"table": "Departments",
+							"schema": "GlobantPoc"
 						}
 					}
 				]
@@ -107,7 +108,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GlobantPoc.HiredEmployees ;\n\n-- Habilitar las restricciones\nALTER TABLE GlobantPoc.HiredEmployees CHECK CONSTRAINT ALL;\n\n\n",
+						"preCopyScript": "-- Deshabilitar las restricciones\nALTER TABLE GPStage.StageHiredEmployees NOCHECK CONSTRAINT ALL;\n\n-- Truncar la tabla\nTRUNCATE TABLE GPStage.StageHiredEmployees ;\n\n-- Habilitar las restricciones\nALTER TABLE GPStage.StageHiredEmployees CHECK CONSTRAINT ALL;\n\n\n",
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
@@ -119,21 +120,10 @@
 							{
 								"source": {
 									"type": "String",
-									"ordinal": 1
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"type": "String",
 									"ordinal": 2
 								},
 								"sink": {
-									"name": "name",
+									"name": "Name",
 									"type": "String",
 									"physicalType": "nvarchar"
 								}
@@ -144,7 +134,7 @@
 									"ordinal": 3
 								},
 								"sink": {
-									"name": "datetime",
+									"name": "HireDate",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								}
@@ -155,7 +145,7 @@
 									"ordinal": 4
 								},
 								"sink": {
-									"name": "department_id",
+									"name": "JobID",
 									"type": "Int32",
 									"physicalType": "int"
 								}
@@ -166,7 +156,7 @@
 									"ordinal": 5
 								},
 								"sink": {
-									"name": "job_id",
+									"name": "DepartmentID",
 									"type": "Int32",
 									"physicalType": "int"
 								}
@@ -194,7 +184,8 @@
 						"referenceName": "DS_DBPoc",
 						"type": "DatasetReference",
 						"parameters": {
-							"table": "HiredEmployees"
+							"table": "StageHiredEmployees",
+							"schema": "GPStage"
 						}
 					}
 				]
@@ -276,7 +267,8 @@
 						"referenceName": "DS_DBPoc",
 						"type": "DatasetReference",
 						"parameters": {
-							"table": "Jobs"
+							"table": "Jobs",
+							"schema": "GlobantPoc"
 						}
 					}
 				]
