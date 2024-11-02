@@ -41,7 +41,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT * FROM GPStage.StageHiredEmployees WHERE HireDate IS NULL',",
+				"     query: 'SELECT * FROM GPStage.StageHiredEmployees',",
 				"     format: 'query') ~> SRCStageHiredEmployees",
 				"SRCStageHiredEmployees derive(FirstName = split(Name, ' ')[1],",
 				"          LastName = split(Name, ' ')[2]) ~> drvSplitName",
