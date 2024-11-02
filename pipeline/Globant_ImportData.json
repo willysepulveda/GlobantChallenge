@@ -3,107 +3,252 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ForEach1",
-				"type": "ForEach",
+				"name": "CP_departments",
+				"type": "Copy",
 				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"items": {
-						"value": "@variables('file')",
-						"type": "Expression"
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
 					},
-					"activities": [
-						{
-							"name": "Copy data1",
-							"type": "Copy",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE GlobantPoc.HiredEmployees",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
 								"source": {
-									"type": "ExcelSource",
-									"storeSettings": {
-										"type": "AzureBlobStorageReadSettings",
-										"recursive": true,
-										"enablePartitionDiscovery": false
-									}
+									"type": "String",
+									"ordinal": 1
 								},
 								"sink": {
-									"type": "AzureSqlSink",
-									"writeBehavior": "insert",
-									"sqlWriterUseTableLock": false
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
+									"name": "id",
+									"type": "Int32",
+									"physicalType": "int"
 								}
 							},
-							"inputs": [
-								{
-									"referenceName": "DS_ExcelPoc",
-									"type": "DatasetReference",
-									"parameters": {
-										"file": {
-											"value": "@item().file",
-											"type": "Expression"
-										},
-										"sheet": {
-											"value": "@item().sheet",
-											"type": "Expression"
-										}
-									}
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 2
+								},
+								"sink": {
+									"name": "department",
+									"type": "String",
+									"physicalType": "nvarchar"
 								}
-							],
-							"outputs": [
-								{
-									"referenceName": "DS_DBPoc",
-									"type": "DatasetReference",
-									"parameters": {
-										"table": {
-											"value": "@item().table",
-											"type": "Expression"
-										}
-									}
-								}
-							]
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
 						}
-					]
-				}
-			}
-		],
-		"variables": {
-			"File": {
-				"type": "Array",
-				"defaultValue": [
+					}
+				},
+				"inputs": [
 					{
-						"file": "departments",
-						"sheet": "departments",
-						"table": "departments"
+						"referenceName": "DS_ExcelPoc",
+						"type": "DatasetReference",
+						"parameters": {
+							"file": "departments",
+							"sheet": "departments"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_DBPoc",
+						"type": "DatasetReference",
+						"parameters": {
+							"table": "departments"
+						}
+					}
+				]
+			},
+			{
+				"name": "CP_HiredEmployees",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
 					},
-					{
-						"file": "hired_employees",
-						"sheet": "hired_employees",
-						"table": "HiredEmployees"
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE GlobantPoc.Departments",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
 					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 1
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 2
+								},
+								"sink": {
+									"name": "department",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
 					{
-						"file": "jobs",
-						"sheet": "jobs",
-						"table": "Jobs"
+						"referenceName": "DS_ExcelPoc",
+						"type": "DatasetReference",
+						"parameters": {
+							"file": "hired_employees",
+							"sheet": "hired_employees"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_DBPoc",
+						"type": "DatasetReference",
+						"parameters": {
+							"table": "HiredEmployees"
+						}
+					}
+				]
+			},
+			{
+				"name": "CP_jobs",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE GlobantPoc.jobs",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 1
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"ordinal": 2
+								},
+								"sink": {
+									"name": "department",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_ExcelPoc",
+						"type": "DatasetReference",
+						"parameters": {
+							"file": "jobs",
+							"sheet": "jobs"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_DBPoc",
+						"type": "DatasetReference",
+						"parameters": {
+							"table": "jobs"
+						}
 					}
 				]
 			}
-		},
+		],
 		"annotations": []
 	}
 }
