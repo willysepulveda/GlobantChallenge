@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adfpocstudio"
+		},
+		"LS_sablpoc_connectionString": {
+			"value": ""
+		},
+		"LS_DBPoc_password": {
+			"value": ""
+		},
+		"LS_DBPoc_properties_typeProperties_server": {
+			"value": "servpoc.database.windows.net"
+		},
+		"LS_DBPoc_properties_typeProperties_database": {
+			"value": "DBPoc"
+		},
+		"LS_DBPoc_properties_typeProperties_userName": {
+			"value": "wsepulve"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
