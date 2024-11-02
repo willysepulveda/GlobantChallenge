@@ -26,7 +26,7 @@
 					"name": "drvSplitName"
 				},
 				{
-					"name": "drvHireDateNull"
+					"name": "drvNullImputation"
 				}
 			],
 			"scriptLines": [
@@ -45,8 +45,10 @@
 				"     format: 'query') ~> SRCStageHiredEmployees",
 				"SRCStageHiredEmployees derive(FirstName = split(Name, ' ')[1],",
 				"          LastName = split(Name, ' ')[2]) ~> drvSplitName",
-				"drvSplitName derive(HireDate_fix = toTimestamp(iifNull(toString(HireDate),'1900-01-01'),'yyyy-MM-dd')) ~> drvHireDateNull",
-				"drvHireDateNull sink(allowSchemaDrift: true,",
+				"drvSplitName derive(HireDate_fix = toTimestamp(iifNull(toString(HireDate),'1900-01-01'),'yyyy-MM-dd'),",
+				"          JobID_fix = iifNull(JobID,0),",
+				"          DepartmentID_fix = iifNull(DepartmentID,0)) ~> drvNullImputation",
+				"drvNullImputation sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          EmployeeID as integer,",
@@ -73,8 +75,8 @@
 				"          HireDate = HireDate_fix,",
 				"          FirstName,",
 				"          LastName,",
-				"          JobID,",
-				"          DepartmentID,",
+				"          JobID = JobID_fix,",
+				"          DepartmentID = DepartmentID_fix,",
 				"          CreatedDate",
 				"     )) ~> snkHiredEmployees"
 			]
