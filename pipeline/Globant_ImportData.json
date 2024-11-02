@@ -37,17 +37,6 @@
 							{
 								"source": {
 									"type": "String",
-									"ordinal": 1
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"type": "String",
 									"ordinal": 2
 								},
 								"sink": {
