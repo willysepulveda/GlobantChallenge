@@ -1,0 +1,79 @@
+{
+	"name": "DF_HiredEmployees_Tranformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_DBPoc",
+						"type": "DatasetReference"
+					},
+					"name": "SRCStageHiredEmployees"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "LS_DBPoc",
+						"type": "LinkedServiceReference"
+					},
+					"name": "snkHiredEmployees"
+				}
+			],
+			"transformations": [
+				{
+					"name": "drvSplitName"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmployeeID as integer,",
+				"          Name as string,",
+				"          HireDate as timestamp,",
+				"          JobID as integer,",
+				"          DepartmentID as integer,",
+				"          CreatedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT * FROM GPStage.StageHiredEmployees',",
+				"     format: 'query') ~> SRCStageHiredEmployees",
+				"SRCStageHiredEmployees derive(FirstName = split(Name, ' ')[1],",
+				"          LastName = split(Name, ' ')[2]) ~> drvSplitName",
+				"drvSplitName sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          EmployeeID as integer,",
+				"          FirstName as string,",
+				"          LastName as string,",
+				"          HireDate as timestamp,",
+				"          JobID as integer,",
+				"          DepartmentID as integer,",
+				"          CreatedDate as timestamp",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'GlobantPoc',",
+				"     tableName: 'HiredEmployees',",
+				"     preSQLs:['TRUNCATE TABLE GlobantPoc.HiredEmployees'],",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          HireDate,",
+				"          FirstName,",
+				"          LastName,",
+				"          JobID,",
+				"          DepartmentID,",
+				"          CreatedDate",
+				"     )) ~> snkHiredEmployees"
+			]
+		}
+	}
+}
