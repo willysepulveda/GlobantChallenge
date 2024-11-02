@@ -75,7 +75,7 @@
 				]
 			},
 			{
-				"name": "CP_HiredEmployee",
+				"name": "CP_StageHiredEmployee",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
